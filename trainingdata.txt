@@ -1,0 +1,108 @@
+
+# How many codes are there from the MP dataset?
+
+match (mp: Code {SAB : 'MP'})  return count(mp) as mp_cnt
+
+<|endoftext|>
+
+# How many codes are there from the HGNC dataset?
+
+match (hgnc: Code {SAB : 'HGNC'})  return count(hgnc) as hgnc_cnt
+
+<|endoftext|>
+
+# What phenotypes are related to HGNC:10593?
+
+match (gene:Code {CODE:'HGNC:10593'})--(gene_C:Concept)-[r]-(hpo_C:Concept)-[c:CODE]-(hpo:Code {SAB: 'HPO'})-[]-(hpo_term:Term)  return distinct hpo_term.name
+
+<|endoftext|>
+
+# What phenotypes are related to HGNC:3756?
+
+match (gene:Code {CODE:'HGNC:3756'})--(gene_C:Concept)-[r]-(hpo_C:Concept)-[c:CODE]-(hpo:Code {SAB: 'HPO'})-[]-(hpo_term:Term)  return distinct hpo_term.name
+
+<|endoftext|>
+
+# What phenotypes are related to HGNC:7584?
+
+match (gene:Code {CODE:'HGNC:7584'})--(gene_C:Concept)-[r]-(hpo_C:Concept)-[c:CODE]-(hpo:Code {SAB: 'HPO'})-[]-(hpo_term:Term)  return distinct hpo_term.name
+
+<|endoftext|>
+
+# What genes are related to the phenotype HP:0031329?
+
+match (hpo:Code {CODE:'HP:0031329'})--(hpo_C:Concept)-[r]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC'})-[:MTH_ACR]-(gene_term:Term) return distinct gene_term.name
+
+<|endoftext|>
+
+# What genes are related to HP:0031295?
+
+match (hpo:Code {CODE:'HP:0031295'})--(hpo_C:Concept)-[r]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC'})-[:MTH_ACR]-(gene_term:Term) return distinct gene_term.name
+
+<|endoftext|>
+
+# What genes are related to HP:0025579?
+
+match (hpo:Code {CODE:'HP:0025579'})--(hpo_C:Concept)-[r]-(gene_C:Concept)-[c:CODE]-(gene:Code {SAB: 'HGNC'})-[:MTH_ACR]-(gene_term:Term) return distinct gene_term.name
+
+<|endoftext|>
+
+# What are 100 gene expression levels for 0005659 where gene expression is greater than .8?
+
+match (ub_code:Code {SAB:'UBERON',CODE:'0005659'})-[r0:CODE]-(ub_cui:Concept)-[r1:tissue_has_median_expression]-(gtex_exp_cui:Concept)-[r2:CODE]-(gtex_exp_code:Code {SAB:'GTEX_EXP'})-[r3]-(gtex_term:Term) where gtex_term.lowerbound > .8 return gtex_exp_code.CODE AS gtex, gtex_term.name AS exp limit 100
+
+<|endoftext|>
+
+# What are 35 gene expression levels for 2001696 where gene expression is greater than .6?
+
+match (ub_code:Code {SAB:'UBERON',CODE:'2001696'})-[r0:CODE]-(ub_cui:Concept)-[r1:tissue_has_median_expression]-(gtex_exp_cui:Concept)-[r2:CODE]-(gtex_exp_code:Code {SAB:'GTEX_EXP'})-[r3]-(gtex_term:Term) where gtex_term.lowerbound > .6 return gtex_exp_code.CODE AS gtex, gtex_term.name AS exp limit 35
+
+<|endoftext|>
+
+# What are the gene expression levels for 0001733 where gene expression is greater than .9?
+
+match (ub_code:Code {SAB:'UBERON',CODE:'0001733'})-[r0:CODE]-(ub_cui:Concept)-[r1:tissue_has_median_expression]-(gtex_exp_cui:Concept)-[r2:CODE]-(gtex_exp_code:Code {SAB:'GTEX_EXP'})-[r3]-(gtex_term:Term) where gtex_term.lowerbound > .9 return gtex_exp_code.CODE AS gtex, gtex_term.name
+
+<|endoftext|>
+
+# Return all tissue codes associated with the 5ba6a5b81e95c93c26a33980f6e957d7 dataset ID.
+
+WITH '5ba6a5b81e95c93c26a33980f6e957d7' as study_id MATCH (tissue_code)-[:CODE]-(tissue_cui:Concept)-[r1:hubmap_dataset_contains_tissue]-(:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:study_id}) RETURN DISTINCT tissue_code.CodeID
+
+<|endoftext|>
+
+# Return all tissue codes from 8776e9183d5f85d90535a0b1b3b4e32a.
+
+WITH '8776e9183d5f85d90535a0b1b3b4e32a' as study_id MATCH (tissue_code)-[:CODE]-(tissue_cui:Concept)-[r1:hubmap_dataset_contains_tissue]-(:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:study_id}) RETURN DISTINCT tissue_code.CodeID
+
+<|endoftext|>
+
+# From the id 17be751d961c5baf6c1dbe2e70c5d93c return all tissue codes.
+
+WITH '17be751d961c5baf6c1dbe2e70c5d93c' as study_id MATCH (tissue_code)-[:CODE]-(tissue_cui:Concept)-[r1:hubmap_dataset_contains_tissue]-(:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:study_id}) RETURN DISTINCT tissue_code.CodeID
+
+<|endoftext|>
+
+# Return how many metadata Codes associated with a HUBMAP dataset
+
+WITH '5ba6a5b81e95c93c26a33980f6e957d7' as dataset_id MATCH (meta_code:Code)-[r0:CODE]-(meta_cui:Concept)<-[r1]-(dataset_cui:Concept)-[:CODE]-(dataset_code:Code {SAB:'HUBMAP DATASET',CODE:dataset_id}) where not r1.SAB in ['HUBMAP_DATASET__TISSUE','HUBMAP_CLUSTER__HUBMAP_DATASET','HUBMAP_DONOR__HUBMAP_DATSET'] RETURN  distinct meta_code.CodeID
+
+<|endoftext|>
+
+# Show a GTEX EXP Concept node, with its HGNC and UBERON Concept nodes connections, along with all three of their Code nodes
+
+match (gtex_exp:Concept)-[r0]-(gtex_exp_code:Code) where gtex_exp_code.SAB = 'GTEX_EXP' match (gtex_exp)-[r1]-(hgnc_concept:Concept)-[r2]-(hgnc_code:Code) where hgnc_code.SAB = 'HGNC' match (gtex_exp)-[r3]-(ub_concept:Concept)-[r4]-(ub_code:Code) where ub_code.SAB = 'UBERON' return * limit 1
+
+<|endoftext|>
+
+# Show EQTL triple
+
+match (eqtl:Code {SAB:'GTEX_EQTL'})-[r]-(c:Concept) match (c)-[*1]-(cc:Concept) return c,cc limit 3
+
+<|endoftext|>
+
+# Show EXP double
+
+match (eqtl:Code {SAB:'GTEX_EXP'})-[r]-(c:Concept) match (c)-[*1]-(cc:Concept) return c,cc limit 2
+
+<|endoftext|>
